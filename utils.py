@@ -13,17 +13,18 @@ def read_rf(filename):
     hdr_info = ('id', 'frames', 'lines', 'samples', 'samplesize')
     hdr, timestamps, data = {}, None, None
     with open(filename, 'rb') as raw_bytes:
-        # read 4 bytes header 
+        # Read the header
+        # Note: Each item in the header is uint32 format (4 bytes) 
         for info in hdr_info:
             hdr[info] = int.from_bytes(raw_bytes.read(4), byteorder='little')
         # set data type
         dtype = f'int{8*hdr["samplesize"]}'  # samplesize is in bytes
         # read timestamps and data
-        timestamps = np.zeros(hdr['frames'], dtype='int64')
-        sz = hdr['lines'] * hdr['samples'] * hdr['samplesize']
-        data = np.zeros((hdr['lines'], hdr['samples'], hdr['frames']), dtype=dtype)
+        timestamps = np.zeros(hdr['frames'], dtype='int64') # Timestamps are uint64 (8 bytes)
+        sz = hdr['lines'] * hdr['samples'] * hdr['samplesize']  # Total size of each frame (in bytes)
+        data = np.zeros((hdr['lines'], hdr['samples'], hdr['frames']), dtype=dtype) # WxHxB
         for frame in range(hdr['frames']):
-            # read 8 bytes of timestamp
+            # read timestamp
             timestamps[frame] = int.from_bytes(raw_bytes.read(8), byteorder='little')
             # read each frame
             data[:, :, frame] = np.frombuffer(raw_bytes.read(sz), dtype=dtype).reshape(data.shape[:2])
