@@ -16,15 +16,17 @@ def read_rf(filename):
         # read 4 bytes header 
         for info in hdr_info:
             hdr[info] = int.from_bytes(raw_bytes.read(4), byteorder='little')
+        # set data type
+        dtype = f'int{8*hdr["samplesize"]}'  # samplesize is in bytes
         # read timestamps and data
         timestamps = np.zeros(hdr['frames'], dtype='int64')
         sz = hdr['lines'] * hdr['samples'] * hdr['samplesize']
-        data = np.zeros((hdr['lines'], hdr['samples'], hdr['frames']), dtype='int16')
+        data = np.zeros((hdr['lines'], hdr['samples'], hdr['frames']), dtype=dtype)
         for frame in range(hdr['frames']):
             # read 8 bytes of timestamp
             timestamps[frame] = int.from_bytes(raw_bytes.read(8), byteorder='little')
             # read each frame
-            data[:, :, frame] = np.frombuffer(raw_bytes.read(sz), dtype='int16').reshape([hdr['lines'], hdr['samples']])
+            data[:, :, frame] = np.frombuffer(raw_bytes.read(sz), dtype=dtype).reshape([hdr['lines'], hdr['samples']])
     print('Loaded {d[2]} raw frames of size, {d[0]} x {d[1]} (lines x samples)'.format(d=data.shape))
     return hdr, timestamps, data
 
