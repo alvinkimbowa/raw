@@ -26,7 +26,7 @@ def read_rf(filename):
             # read 8 bytes of timestamp
             timestamps[frame] = int.from_bytes(raw_bytes.read(8), byteorder='little')
             # read each frame
-            data[:, :, frame] = np.frombuffer(raw_bytes.read(sz), dtype=dtype).reshape([hdr['lines'], hdr['samples']])
+            data[:, :, frame] = np.frombuffer(raw_bytes.read(sz), dtype=dtype).reshape(data.shape[:2])
     print('Loaded {d[2]} raw frames of size, {d[0]} x {d[1]} (lines x samples)'.format(d=data.shape))
     return hdr, timestamps, data
 
