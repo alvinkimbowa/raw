@@ -18,7 +18,12 @@ def read_rf(filename):
         for info in hdr_info:
             hdr[info] = int.from_bytes(raw_bytes.read(4), byteorder='little')
         # set data type
-        dtype = f'int{8*hdr["samplesize"]}'  # samplesize is in bytes
+        if hdr['samplesize'] == 1:
+            dtype = 'uint8'
+        elif hdr['samplesize'] == 2:
+            dtype = 'int16'
+        else:
+            raise ValueError(f'Unsupported sample size: {hdr["samplesize"]}. Supported sizes are 1 and 2.')
         # read timestamps and data
         timestamps = np.zeros(hdr['frames'], dtype='int64') # Timestamps are uint64 (8 bytes)
         sz = hdr['lines'] * hdr['samples'] * hdr['samplesize']  # Total size of each frame (in bytes)
